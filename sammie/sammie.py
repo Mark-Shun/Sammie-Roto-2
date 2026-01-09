@@ -181,12 +181,11 @@ class SamManager:
         # initialize the predictor
         self.inference_state = self.predictor.init_state(video_path=frames_dir, async_loading_frames=True, offload_video_to_cpu=True)
     
-    # Function to run segmentation and save the mask
+# Function to run segmentation and save the mask
     def segment_image(self, frame_number, object_id, input_points, input_labels):
         extension = get_frame_extension()
         frame_filename = os.path.join(frames_dir, f"{frame_number:05d}.{extension}")
         if os.path.exists(frame_filename):
-            self.predictor.reset_state(self.inference_state)
             _, out_obj_ids, out_mask_logits = self.predictor.add_new_points_or_box( # returns a list of masks which includes all objects
                 inference_state=self.inference_state,
                 frame_idx=frame_number,
@@ -238,7 +237,7 @@ class SamManager:
                     )
 
                 except Exception as e:
-                    print(f"Error during prediction for frame {frame_number}, object {object_id}, points {i}: {e}")
+                    print(f"Error during prediction for frame {frame_number}, object {object_id}: {e}")
                     continue
 
                 # Save masks (only on the final iteration for this object)

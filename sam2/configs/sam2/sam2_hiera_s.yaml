@@ -84,7 +84,7 @@ model:
           use_dwconv: True  # depth-wise convs
         num_layers: 2
 
-  num_maskmem: 7
+  num_maskmem: 10
   image_size: 1024
   # apply scaled sigmoid on mask logits for memory encoder, and directly feed input mask as output mask
   sigmoid_scale_for_mem_enc: 20.0

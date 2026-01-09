@@ -81,7 +81,7 @@ model:
           use_dwconv: True  # depth-wise convs
         num_layers: 2
 
-  num_maskmem: 7
+  num_maskmem: 10
   image_size: 1024
   # apply scaled sigmoid on mask logits for memory encoder, and directly feed input mask as output mask
   sigmoid_scale_for_mem_enc: 20.0
@@ -97,6 +97,8 @@ model:
   iou_prediction_use_sigmoid: True
   # cross-attend to object pointers from other frames (based on SAM output tokens) in the encoder
   use_obj_ptrs_in_encoder: true
+  # maximum number of object pointers from other frames in encoder cross attention (increased for multi-object tracking)
+  max_obj_ptrs_in_encoder: 32
   add_tpos_enc_to_obj_ptrs: false
   only_obj_ptrs_in_the_past_for_eval: true
   # object occlusion prediction
