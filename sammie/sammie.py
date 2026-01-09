@@ -154,7 +154,37 @@ class SamManager:
                 f"Please run 'install_dependencies' and select the option to download models."
             )
         
-        self.predictor = build_sam2_video_predictor(model_cfg, checkpoint, device=device)
+        # Get boost multi-object performance preset
+        settings_mgr = get_settings_manager()
+        enhanced_mode = settings_mgr.get_app_setting("enhanced_multi_object", True)
+        
+        # Add configuration overrides for better multi-object support
+        hydra_overrides_extra = []
+        
+        # Enhanced settings for multi-object scenarios
+        if enhanced_mode:
+            
+            max_obj_ptrs = settings_mgr.get_app_setting("object_pointer_limit", 32)
+            overlap_prevention = settings_mgr.get_app_setting("enable_overlap_prevention", True)
+            adaptive_multimask = settings_mgr.get_app_setting("adaptive_multimask", True)
+            
+            hydra_overrides_extra.extend([
+                f"++model.max_obj_ptrs_in_encoder={max_obj_ptrs}",              # Support more objects
+                f"++model.non_overlap_masks={str(overlap_prevention).lower()}",  # Prevent conflicts
+                "++model.add_all_frames_to_correct_as_cond=true",                 # Better conditioning
+                "++model.multimask_min_pt_num=1",                                # Better initial segmentation
+                "++model.multimask_max_pt_num=3",                                # More mask options
+                f"++model.sam_mask_decoder_extra_args.dynamic_multimask_via_stability={str(adaptive_multimask).lower()}",
+                "++model.sam_mask_decoder_extra_args.dynamic_multimask_stability_delta=0.05",
+                "++model.sam_mask_decoder_extra_args.dynamic_multimask_stability_thresh=0.98",
+            ])
+        
+        self.predictor = build_sam2_video_predictor(
+            model_cfg, 
+            checkpoint, 
+            device=device, 
+            hydra_overrides_extra=hydra_overrides_extra
+        )
 
     def offload_model_to_cpu(self):
         """Offload SAM2 model to CPU to free VRAM"""

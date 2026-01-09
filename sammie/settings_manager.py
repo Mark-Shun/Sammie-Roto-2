@@ -56,8 +56,16 @@ class ApplicationSettings:
     
     # Performance
     sam_model: str = "Base"
-    force_cpu: bool = False    
+    force_cpu: bool = False
     frame_format: str = "png"
+    
+    # Multi-Object Enhance Performance Preset
+    enhanced_multi_object: bool = True  # Enable enhanced settings for many objects
+    max_objects: int = 20  # Maximum number of objects to track
+    object_pointer_limit: int = 32  # Max object pointers in encoder
+    memory_frames: int = 12  # Number of memory frames to keep
+    enable_overlap_prevention: bool = True  # Prevent mask overlaps
+    adaptive_multimask: bool = True  # Enable adaptive multimask
     display_update_frequency: int = 5
     
     # Deduplication

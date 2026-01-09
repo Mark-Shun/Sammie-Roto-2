@@ -3,7 +3,7 @@ from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QGridLayout, QTabWidget,
     QGroupBox, QLabel, QSpinBox, QDoubleSpinBox, QCheckBox, 
     QPushButton, QComboBox, QSlider, QWidget, QFormLayout, QScrollArea,
-    QDialogButtonBox
+    QDialogButtonBox, QMessageBox
 )
 from PySide6.QtCore import Qt
 from sammie.settings_manager import SettingsManager
@@ -207,6 +207,12 @@ class SettingsDialog(QDialog):
         self.force_cpu_cb.setToolTip("Force processing to use CPU instead of GPU. Only used for debugging purposes.")
         model_layout.addRow("Force CPU Processing:", self.force_cpu_cb)
         
+        # Enhanced Multi-Object Mode checkbox
+        self.enhanced_mode_cb = QCheckBox()
+        self.enhanced_mode_cb.setToolTip("Enable enhanced settings for better tracking of multiple objects.\nRequires application restart.")
+        self.enhanced_mode_cb.clicked.connect(self._on_enhanced_mode_toggled)
+        model_layout.addRow("Enhanced Multi-Object Mode:", self.enhanced_mode_cb)
+        
         layout.addWidget(model_group)
         
         # Frame extraction settings group
@@ -301,6 +307,7 @@ class SettingsDialog(QDialog):
         # General tab
         self.sam_model_combo.setCurrentText(app_settings.sam_model)
         self.force_cpu_cb.setChecked(app_settings.force_cpu)
+        self.enhanced_mode_cb.setChecked(app_settings.enhanced_multi_object)
         self.frame_format_combo.setCurrentText(app_settings.frame_format)
         self.display_update_slider.setValue(app_settings.display_update_frequency)
         self.display_update_label.setText(str(app_settings.display_update_frequency))
@@ -346,6 +353,7 @@ class SettingsDialog(QDialog):
         # General tab
         app_settings.sam_model = self.sam_model_combo.currentText()
         app_settings.force_cpu = self.force_cpu_cb.isChecked()
+        app_settings.enhanced_multi_object = self.enhanced_mode_cb.isChecked()
         app_settings.frame_format = self.frame_format_combo.currentText()
         app_settings.display_update_frequency = self.display_update_slider.value()
         app_settings.dedupe_threshold = self.deduplication_threshold_spin.value()
@@ -385,3 +393,13 @@ class SettingsDialog(QDialog):
         """Cancel changes and close dialog"""
         self._restore_app_settings()
         super().reject()
+
+    def _on_enhanced_mode_toggled(self, checked):
+        """Show warning when enhanced mode is toggled"""
+        QMessageBox.warning(
+            self,
+            "Restart Required",
+            "Changing the 'Enhanced Multi-Object Mode' setting requires an application restart to take effect.",
+            QMessageBox.Ok
+        )
+
